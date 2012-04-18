@@ -3,13 +3,19 @@
 
 $(document).ready(function() {   
 
-  var socket = io.connect();
+    var socket = io.connect();
 
-  $('#sender').bind('click', function() {
-   socket.emit('message', 'Message Sent on ' + new Date());     
-  });
+    $('#sender').bind('click', function() {
+         socket.emit('join', {playerId: socket.socket.sessionid});
+    });
 
-  socket.on('server_message', function(data){
-   $('#reciever').append('<li>' + data + '</li>');  
-  });
+    $('.clicky').bind('click', function(el) {
+        socket.emit('message', 
+            {playerId: socket.socket.sessionid,
+            'message': $(this).css('background-color')});
+    });
+
+    socket.on('server_message', function(data){
+        $('#reciever').append('<li>' + data + '</li>');  
+    });
 });

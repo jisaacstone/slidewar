@@ -2,6 +2,7 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
+    , game = require('./game')
     , port = (process.env.PORT || 8081);
 
 //Setup Express
@@ -42,14 +43,24 @@ var io = io.listen(server);
 io.sockets.on('connection', function(socket){
   console.log('Client Connected');
   socket.on('message', function(data){
-    socket.broadcast.emit('server_message',data);
-    socket.emit('server_message',data);
+    if( ! (data.playerId in game.games.players)){
+        socket.emit('server_message', 'Join a Game First!');
+        return
+    }
+    io.sockets.in(game.games.players[data.playerId]).emit(
+        'server_message',
+        data.message);
+  });
+  socket.on('join', function(data){
+    gameData = game.games.join(data);
+    socket.join(gameData.room);
+    console.log(gameData.room);
+    io.sockets.in(gameData.room).emit('server_message', gameData.game);
   });
   socket.on('disconnect', function(){
     console.log('Client Disconnected.');
   });
 });
-
 
 ///////////////////////////////////////////
 //              Routes                   //

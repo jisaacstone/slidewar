@@ -1,0 +1,15 @@
+.clicky{
+    width: 200px;
+    height: 200px;
+    float: left;
+    padding: 10px;
+}
+.red{
+    background-color: red;
+}
+.blue{
+    background-color: blue;
+}
+.violet{
+    background-color: violet;
+}

@@ -1,6 +1,13 @@
 extends layout
 
+block css
+    link(rel="stylesheet", href="/css/divs.css")
+
 block content
-	div
-		a(id='sender')='Send a Message'
-		ul(id='reciever')
+    div.area
+        div.clicky.red
+        div.clicky.blue
+        div.clicky.violet
+    div
+        a(id='sender')='Send a Message'
+        ul(id='reciever')
