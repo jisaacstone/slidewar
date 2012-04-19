@@ -51,11 +51,21 @@ io.sockets.on('connection', function(socket){
         'server_message',
         data.message);
   });
+  socket.on('move', function(data){
+    moveData = game.games.move(data);
+    io.sockets.in(moveData.gameId).emit('gameUpdate', moveData);
+  });
   socket.on('join', function(data){
     gameData = game.games.join(data);
-    socket.join(gameData.room);
-    console.log(gameData.room);
-    io.sockets.in(gameData.room).emit('server_message', gameData.game);
+    socket.join(gameData.gameId);
+    io.sockets.in(gameData.gameId).emit('serverMessage', gameData.gameId);
+    if gameData.start{
+        io.sockets.in(gameData.gameId).emit('gameStart', gameData.gameId);
+        io.sockets.in(gameData.gameId).emit('gameUpdate', {
+            method: 'gameStart',
+            args: game.games.runningGames[gameData.gameId].settings
+        });
+    }
   });
   socket.on('disconnect', function(){
     console.log('Client Disconnected.');
