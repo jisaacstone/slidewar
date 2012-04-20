@@ -14,7 +14,10 @@
     background-color: violet;
 }
 .gameContainer{
-    padding: 30px;
+    padding: 10%;
+    margin: 10% auto;
+    height: 80%;
+    background-color: #EDEFF3;
 }
 .tile{
     width: 60px;

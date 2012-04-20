@@ -42,31 +42,61 @@ server.listen( port);
 var io = io.listen(server);
 io.sockets.on('connection', function(socket){
   console.log('Client Connected');
+
   socket.on('message', function(data){
     if( ! (data.playerId in game.games.players)){
-        socket.emit('server_message', 'Join a Game First!');
+        socket.emit('serverMessage', 'Join a Game First!');
         return
     }
     io.sockets.in(game.games.players[data.playerId]).emit(
-        'server_message',
+        'serverMessage',
         data.message);
   });
+
   socket.on('move', function(data){
+    data = JSON.parse(data);
     moveData = game.games.move(data);
-    io.sockets.in(moveData.gameId).emit('gameUpdate', moveData);
+    io.sockets.in(moveData.gameId).emit('serverMessage', moveData);
   });
+
   socket.on('join', function(data){
     gameData = game.games.join(data);
     socket.join(gameData.gameId);
     io.sockets.in(gameData.gameId).emit('serverMessage', gameData.gameId);
-    if gameData.start{
+    if(gameData.start){
         io.sockets.in(gameData.gameId).emit('gameStart', gameData.gameId);
-        io.sockets.in(gameData.gameId).emit('gameUpdate', {
-            method: 'gameStart',
-            args: game.games.runningGames[gameData.gameId].settings
-        });
+        var currentGame = game.games.runningGames[gameData.gameId];
+        startData = currentGame.start();
+        for(var playerId in startData){
+            io.sockets.in(gameData.gameId).emit('gameUpdate', 
+                JSON.stringify({
+                method: 'startGame',
+                args: {
+                    tiles: Object.keys(currentGame.tiles),
+                    yourTiles: startData[playerId]
+                } 
+            }));
+        }
+        /*
+        for(var player in game.games.runningGames[gameData.gameId].players){
+            io.clients[player].send('gameUpdate', {});
+        }
+        */
     }
   });
+
+  socket.on('gameUpdate', function(data){
+    data = JSON.parse(data);
+    var gameId = game.games.players[data.playerId];
+    var result = game.games[gameId][data.method](data.args);
+    if(result){
+        io.sockets.in(gameData.gameId).emit(
+            'gameUpdate',                       
+            JSON.stringify(result)                                                    
+        ); 
+    }
+  });
+
   socket.on('disconnect', function(){
     console.log('Client Disconnected.');
   });
