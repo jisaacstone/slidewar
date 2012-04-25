@@ -4,10 +4,9 @@ function Games(){
     this.openGames = {};
     this.defaultSettings = {
         numPlayers: 2,
-        width: 5,
-        height: 5,
         tiles: [
             "one",      
+            "two","two",
         ],
     };
 
@@ -41,7 +40,6 @@ function Games(){
     }
 
     this.start = function(gameId){
-        this.grid = new Grid(this.map);
         return this.runningGames[gameId].start();
     }
 }
@@ -63,7 +61,7 @@ function Game(id, settings){
                 var tileClass = this.settings.tiles[j];
                 var tileId = (Math.random() + "").slice(2);
                 this.tiles[tileId] = new Tile(tileId, playerId, tileClass);
-                this.tiles[tileId].x = -1 + (i * (this.settings.width+2)); 
+                this.tiles[tileId].x = -1 + (i * (this.map.width+1)); 
                 this.tiles[tileId].y = +j;
                 this.playerTiles[playerId].push(this.tiles[tileId]);
                 tileData.push({id: tileId, x: this.tiles[tileId].x, y: this.tiles[tileId].y});
@@ -78,7 +76,6 @@ function Game(id, settings){
             throw new Error("attempting to activate unowned tile!");
         }
         if ( ! tile.active){
-            tile.active = true;
             for(var i in this.players) {
                 console.log(this.players[i]);
                 if(this.players[i] === data.playerId) {
@@ -86,7 +83,8 @@ function Game(id, settings){
                 }
             }
             console.log(startPos);
-            if(this.isOpen(startPos.x, startPos.y)){
+            if(this.isOpen(startPos.x, startPos.y, tile.id)){
+                tile.active = true;
                 tile.x = startPos.x;
                 tile.y = startPos.y;
 
@@ -110,7 +108,7 @@ function Game(id, settings){
         do {
             tile[axis] += move.sign[data.direction];
         }
-        while(this.isOpen(tile.x, tile.y))
+        while(this.isOpen(tile.x, tile.y, tile.id))
         tile[axis] -= move.sign[data.direction]; 
         console.log(tile[axis]);
         return {
@@ -124,7 +122,7 @@ function Game(id, settings){
         };
     }                                                                           
 
-    this.isOpen = function(x, y){
+    this.isOpen = function(x, y, tileId){
         if(x < 0 || y < 0 || x >= this.map.width || y >= this.map.height){
             console.log("out of bounds");
             return false;
@@ -134,12 +132,11 @@ function Game(id, settings){
             return false;
         }
         for(var tile in this.tiles){
-            var selfFound = false;
             if(this.tiles[tile].x == x && this.tiles[tile].y == y){
-                if(selfFound){
+                if(this.tiles[tile].id != tileId){
+                    console.log("tile found");
                     return false;
                 }
-                sefFound = true;
             }
         }
         return true;
@@ -168,8 +165,8 @@ var defaultMap = {
         [1,0,0,0,0,0,1],                                                        
         [1,1,0,0,0,1,1]                                                         
     ],                                                                          
-    width: 6,                                                                   
-    height: 6,                                                                  
+    width: 7,                                                                   
+    height: 7,                                                                  
     start: [
         {x: 3, y: 1},
         {x: 3, y: 5}
