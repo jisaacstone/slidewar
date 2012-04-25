@@ -53,12 +53,6 @@ io.sockets.on('connection', function(socket){
         data.message);
   });
 
-  socket.on('move', function(data){
-    data = JSON.parse(data);
-    moveData = game.games.move(data);
-    io.sockets.in(moveData.gameId).emit('serverMessage', moveData);
-  });
-
   socket.on('join', function(data){
     gameData = game.games.join(data);
     socket.join(gameData.gameId);
@@ -67,28 +61,31 @@ io.sockets.on('connection', function(socket){
         io.sockets.in(gameData.gameId).emit('gameStart', gameData.gameId);
         var currentGame = game.games.runningGames[gameData.gameId];
         startData = currentGame.start();
-        for(var playerId in startData){
-            io.sockets.in(gameData.gameId).emit('gameUpdate', 
+        for(var playerId in startData[1]){
+            io.sockets.sockets[playerId].emit('gameUpdate', 
                 JSON.stringify({
                 method: 'startGame',
                 args: {
-                    tiles: Object.keys(currentGame.tiles),
-                    yourTiles: startData[playerId]
+                    tiles: startData[0],
+                    yourTiles: startData[1][playerId],
+                    playerNum: Object.keys(startData[1]).indexOf(playerId),
                 } 
             }));
         }
-        /*
-        for(var player in game.games.runningGames[gameData.gameId].players){
-            io.clients[player].send('gameUpdate', {});
-        }
-        */
     }
   });
 
   socket.on('gameUpdate', function(data){
     data = JSON.parse(data);
     var gameId = game.games.players[data.playerId];
-    var result = game.games[gameId][data.method](data.args);
+    data.args["playerId"] = data.playerId;
+    try {
+        var result = game.games.runningGames[gameId][data.method](data.args);
+    } 
+    catch (err) {
+        console.trace(err);
+        return;
+    }
     if(result){
         io.sockets.in(gameData.gameId).emit(
             'gameUpdate',                       

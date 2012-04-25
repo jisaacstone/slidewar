@@ -14,13 +14,22 @@
     background-color: violet;
 }
 .gameContainer{
-    padding: 10%;
-    margin: 10% auto;
-    height: 80%;
+    position: relative;
+    margin: 10px auto;
+    height: 540px;
+    width: 420px;
     background-color: #EDEFF3;
 }
 .tile{
+    position: absolute;
     width: 60px;
     height: 90px;
     border: 1px solid teal;
+    background-color: #CDCFF1;
+}
+.yours{
+    background-color: #C2FDD5;
+}
+div.active{
+    border: 1px solid aqua;
 }
