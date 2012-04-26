@@ -19,6 +19,7 @@
     height: 630px;
     width: 420px;
     background-color: #EDEFF3;
+    background-image: url('/images/gamebg.png');
 }
 .tile{
     position: absolute;

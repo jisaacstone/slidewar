@@ -87,10 +87,26 @@ io.sockets.on('connection', function(socket){
         return;
     }
     if(result){
-        io.sockets.in(gameData.gameId).emit(
-            'gameUpdate',                       
-            JSON.stringify(result)                                                    
-        ); 
+        var delay = ("time" in result.args ? result.args.time : 0) + 10;
+        var queue = game.games.runningGames[gameId].queue;
+        console.log(queue, queue[queue.length - 1]);
+        if(queue.length){
+            var waitFor = Math.max(0, 
+                (
+                    queue[queue.length - 1]._idleStart.getTime() 
+                    + queue[queue.length - 1]._idleTimeout
+                ) - Date.now()
+            );
+        } else {
+            var waitFor = 0;
+        }
+        setTimeout(function(){
+            io.sockets.in(gameData.gameId).emit(
+                'gameUpdate',                       
+                JSON.stringify(result)                                                    
+            ); 
+        }, waitFor);
+        queue.push(setTimeout(function(){}, waitFor + delay));
     }
   });
 

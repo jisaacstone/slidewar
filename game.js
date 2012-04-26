@@ -51,6 +51,7 @@ function Game(id, settings){
     this.playerTiles = {};
     this.tiles = {};
     this.map = defaultMap;
+    this.queue = [];
 
     this.start = function(){
         var tileData = [];
@@ -107,6 +108,7 @@ function Game(id, settings){
         console.log(tile[axis]);
         do {
             tile[axis] += move.sign[data.direction];
+
         }
         while(this.isOpen(tile.x, tile.y, tile.id))
         tile[axis] -= move.sign[data.direction]; 
