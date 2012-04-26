@@ -112,7 +112,7 @@ function Game(id, settings){
         console.log(tile[axis]);
         do {
             tile[axis] += move.sign[data.direction];
-            var action = this.isAction(tile.x, tile.y, tile.is);
+            var action = this.isAction(tile.x, tile.y, tile.id);
             if(action){
                 if(action.stop){
                     tile[axis] += move.sign[data.direction];
@@ -155,6 +155,10 @@ function Game(id, settings){
     }
 
     this.isAction = function(x, y, tileId){
+        if(x < 0 || y < 0 || x >= this.map.width || y >= this.map.height){      
+            return false;                                                       
+        }                                                                       
+
         if( ! (this.map.map[y][x] in [0,1])){
             return this.map.actions[this.map.map[y][x]];
         }
@@ -175,13 +179,13 @@ function Tile(id, owner, tileClass){
 
 var defaultMap = {                                                                
     map: [                                                                      
-        [1,1,0,"s",0,1,1],                                                        
-        [1,0,0,"b",0,0,1],                                                        
-        [0,0,0,"s",0,0,0],                                                        
-        [0,0,0, 1 ,0,0,0],                                                        
-        [0,0,0,"s",0,0,0],                                                        
-        [1,0,0,"b",0,0,1],                                                        
-        [1,1,0,"s",0,1,1]                                                         
+        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ],                                                        
+        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],                                                        
+        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],                                                        
+        [ 0 , 0 ,'s', 1 ,'s', 0 , 0 ],                                                        
+        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],                                                        
+        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],                                                        
+        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ]                                                         
     ],                                                                          
     width: 7,                                                                   
     height: 7,                                                                  

@@ -79,22 +79,22 @@ io.sockets.on('connection', function(socket){
     data = JSON.parse(data);
     var gameId = game.games.players[data.playerId];
     data.args["playerId"] = data.playerId;
-    try {
+    //try {
         var result = game.games.runningGames[gameId][data.method](data.args);
-    } 
-    catch (err) {
-        console.trace(err);
-        return;
-    }
+    //} 
+    //catch (err) {
+    //    console.trace(err);
+    //    return;
+    //}
     if(result){
         var delay = ("time" in result.args ? result.args.time : 0) + 10;
         var queue = game.games.runningGames[gameId].queue;
-        console.log(queue, queue[queue.length - 1]);
+        console.log(queue, queue[0]);
         if(queue.length){
             var waitFor = Math.max(0, 
                 (
-                    queue[queue.length - 1]._idleStart.getTime() 
-                    + queue[queue.length - 1]._idleTimeout
+                    queue[0]._idleStart.getTime() 
+                    + queue[0]._idleTimeout
                 ) - Date.now()
             );
         } else {
@@ -106,7 +106,7 @@ io.sockets.on('connection', function(socket){
                 JSON.stringify(result)                                                    
             ); 
         }, waitFor);
-        queue.push(setTimeout(function(){}, waitFor + delay));
+        queue[0] = (setTimeout(function(){}, waitFor + delay));
     }
   });
 
