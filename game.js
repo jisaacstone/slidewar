@@ -65,7 +65,11 @@ function Game(id, settings){
                 this.tiles[tileId].x = -1 + (i * (this.map.width+1)); 
                 this.tiles[tileId].y = +j;
                 this.playerTiles[playerId].push(this.tiles[tileId]);
-                tileData.push({id: tileId, x: this.tiles[tileId].x, y: this.tiles[tileId].y});
+                tileData.push({
+                    id: tileId, 
+                    x: this.tiles[tileId].x, 
+                    y: this.tiles[tileId].y
+                });
             }        
         }
         return [tileData, this.playerTiles];
@@ -108,7 +112,13 @@ function Game(id, settings){
         console.log(tile[axis]);
         do {
             tile[axis] += move.sign[data.direction];
-
+            var action = this.isAction(tile.x, tile.y, tile.is);
+            if(action){
+                if(action.stop){
+                    tile[axis] += move.sign[data.direction];
+                    break;
+                }
+            }
         }
         while(this.isOpen(tile.x, tile.y, tile.id))
         tile[axis] -= move.sign[data.direction]; 
@@ -144,6 +154,12 @@ function Game(id, settings){
         return true;
     }
 
+    this.isAction = function(x, y, tileId){
+        if( ! (this.map.map[y][x] in [0,1])){
+            return this.map.actions[this.map.map[y][x]];
+        }
+        return false;
+    }
 }
 
 function Tile(id, owner, tileClass){
@@ -159,20 +175,28 @@ function Tile(id, owner, tileClass){
 
 var defaultMap = {                                                                
     map: [                                                                      
-        [1,1,0,0,0,1,1],                                                        
-        [1,0,0,0,0,0,1],                                                        
-        [0,0,0,0,0,0,0],                                                        
-        [0,0,0,1,0,0,0],                                                        
-        [0,0,0,0,0,0,0],                                                        
-        [1,0,0,0,0,0,1],                                                        
-        [1,1,0,0,0,1,1]                                                         
+        [1,1,0,"s",0,1,1],                                                        
+        [1,0,0,"b",0,0,1],                                                        
+        [0,0,0,"s",0,0,0],                                                        
+        [0,0,0, 1 ,0,0,0],                                                        
+        [0,0,0,"s",0,0,0],                                                        
+        [1,0,0,"b",0,0,1],                                                        
+        [1,1,0,"s",0,1,1]                                                         
     ],                                                                          
     width: 7,                                                                   
     height: 7,                                                                  
     start: [
         {x: 3, y: 1},
         {x: 3, y: 5}
-    ]
+    ],
+    actions: {
+        s: {
+            stop: true,
+        },
+        b: {
+            stop: true,
+        },
+    }
 }       
 
 
