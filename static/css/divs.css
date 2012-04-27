@@ -4,15 +4,7 @@
     float: left;
     padding: 10px;
 }
-.red{
-    background-color: red;
-}
-.blue{
-    background-color: blue;
-}
-.violet{
-    background-color: violet;
-}
+
 .gameContainer{
     position: relative;
     margin: 10px auto;
@@ -25,12 +17,34 @@
     position: absolute;
     width: 60px;
     height: 90px;
-    border: 1px solid teal;
-    background-color: #CDCFF1;
+    background-color: #B99d80;
+    display: none;
 }
-.yours{
-    background-color: #C2FDD5;
+div.yours{
+    display: block;
+    background-color: #888dad;
 }
 div.active{
-    border: 1px solid aqua;
+    display: block;
+}
+div.captured{
+    display: block;
+}
+.one{
+    background-image: url('/images/one.png');
+}
+.two{
+    background-image: url('/images/two.png');
+}
+.three{
+    background-image: url('/images/three.png');
+}
+.spy{
+    background-image: url('/images/spy.png');
+}
+.bomb{
+    background-image: url('/images/bomb.png');
+}
+.flag{
+    background-image: url('/images/flag.png');
 }

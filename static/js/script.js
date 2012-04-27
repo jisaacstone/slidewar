@@ -163,12 +163,30 @@ function Tile(id, game) {
         animateCss[data.attribute] = (
             data.change * this.game.settings[data.attribute]
         ) + "px";
-        $("#" + this.id).animate(animateCss, data.time);
+        $("#" + this.id).animate(animateCss, data.time, "linear");
+        if(data.battle){
+            setTimeout(function(){
+                for(var i in data.battle.losses){
+                    game.tiles[data.battle.losses[i]].kill();
+                }
+                for(var i in data.battle.actions){
+                    var action = data.battle.actions[i][0];
+                    var actionData = data.battle.actions[i][1];
+                    if(action == "win"){
+                        $(".tile").removeClass('active');
+                    }
+                }
+            }, data.time);
+        }
     }
 
     this.moveTo = function(pos){
         $("#" + this.id).css(pos);
     }
+
+    this.kill = function(){
+        $("#" + this.id).remove();
+    };
 }
 
 

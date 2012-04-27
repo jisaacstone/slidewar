@@ -6,7 +6,11 @@ function Games(){
         numPlayers: 2,
         tiles: [
             "one",      
-            "two","two",
+            "two",
+            "three", "three",
+            "flag",
+            "bomb",
+            "spy",
         ],
     };
 
@@ -23,6 +27,7 @@ function Games(){
         if(gameStart){
             this.runningGames[gameToJoin] = this.openGames[gameToJoin];
             delete this.openGames[gameToJoin];
+            this.runningGames[gameToJoin].state = "running";
         }
 
         this.players[data.playerId] = gameToJoin;
@@ -50,8 +55,11 @@ function Game(id, settings){
     this.players = [];
     this.playerTiles = {};
     this.tiles = {};
+    this.activeTiles = {};
     this.map = defaultMap;
     this.queue = [];
+    this.state = "open";
+    this.winner = false;
 
     this.start = function(){
         var tileData = [];
@@ -90,6 +98,7 @@ function Game(id, settings){
             console.log(startPos);
             if(this.isOpen(startPos.x, startPos.y, tile.id)){
                 tile.active = true;
+                this.activeTiles[tile.id] = tile;
                 tile.x = startPos.x;
                 tile.y = startPos.y;
 
@@ -104,6 +113,7 @@ function Game(id, settings){
     }    
 
     this.move = function(data){                                                 
+        var battle = false;
         var tile = this.tiles[data.tileId];
         if(tile.owner != data.playerId){
             throw new Error("attempting to move unowned tile!");
@@ -114,6 +124,9 @@ function Game(id, settings){
             tile[axis] += move.sign[data.direction];
             var action = this.isAction(tile.x, tile.y, tile.id);
             if(action){
+                if(action.battle){
+                    battle = action.battle;
+                }
                 if(action.stop){
                     tile[axis] += move.sign[data.direction];
                     break;
@@ -130,6 +143,7 @@ function Game(id, settings){
                 attribute: move.attribute[data.direction],
                 change: tile[axis],
                 time: 1000,
+                battle: battle,
             }
         };
     }                                                                           
@@ -143,7 +157,7 @@ function Game(id, settings){
             console.log("map not open");
             return false;
         }
-        for(var tile in this.tiles){
+        for(var tile in this.activeTiles){
             if(this.tiles[tile].x == x && this.tiles[tile].y == y){
                 if(this.tiles[tile].id != tileId){
                     console.log("tile found");
@@ -155,15 +169,69 @@ function Game(id, settings){
     }
 
     this.isAction = function(x, y, tileId){
+
+        // out of bounds test
         if(x < 0 || y < 0 || x >= this.map.width || y >= this.map.height){      
             return false;                                                       
         }                                                                       
 
+        // collision with an enemy tile
+        for(var i in this.players){
+            var player = this.players[i];
+            console.log(player, this.tiles[tileId].owner);
+            if(player != this.tiles[tileId].owner) {
+                for(var j in this.playerTiles[player]) {
+                    var testTile = this.playerTiles[player][j];
+                    if(testTile.active && testTile.x == x && testTile.y == y){
+                        return {
+                            battle: this.fightBattle({
+                                a: this.tiles[tileId],
+                                d: testTile
+                            }),
+                            stop: true,
+                        };
+                    }
+                }
+            }
+        }
+
+        // map-based actions
         if( ! (this.map.map[y][x] in [0,1])){
             return this.map.actions[this.map.map[y][x]];
         }
         return false;
-    }
+    };
+
+    this.fightBattle = function(combatants){
+        losses = [];
+        actions = [];
+        if(loss.attack[combatants.a.tileClass].indexOf(combatants.d.tileClass) > -1){
+            combatants.a.active = false;
+            delete this.activeTiles[combatants.a.id];
+            losses.push(combatants.a.id);
+            if(loss.action[combatants.a.tileClass]){
+                actions.push(loss.action[combatants.a.tileClass]);
+            };
+        }
+        if(loss.defense[combatants.d.tileClass].indexOf(combatants.a.tileClass) > -1){
+            combatants.d.active = false;
+            delete this.activeTiles[combatants.d.id];
+            losses.push(combatants.d.id);
+            if(loss.action[combatants.d.tileClass]){
+                var action = loss.action[combatants.a.tileClass];
+                actions.push(this.act(combatants.d.id, action));
+            };
+        }
+        return {losses: losses, actions: actions};
+    };
+
+    this.act = function(tileId, action){
+        if(action == "win"){
+            this.state = "over";
+            this.winner = this.tiles[tileId].owner;
+            return ["win", this.winner];
+        }
+    };
 }
 
 function Tile(id, owner, tileClass){
@@ -201,8 +269,7 @@ var defaultMap = {
             stop: true,
         },
     }
-}       
-
+};       
 
 var move = {
     sign: {
@@ -223,7 +290,30 @@ var move = {
         left: "left",
         right: "left"
     }
-}
+};
+
+var loss = {
+    attack: {
+        one: ["bomb", "one"],
+        two: ["bomb", "one", "two"],
+        three: ["one", "two", "three"],
+        spy: ["bomb"],
+        bomb: ["one", "two", "three", "spy", "flag", "bomb"],
+        flag: ["one", "two", "three", "spy", "bomb"],
+    }, 
+    defense: {
+        one: ["bomb", "one"],
+        two: ["bomb", "one", "two"],
+        three: ["one", "two", "three"],
+        spy: ["one", "two", "three", "spy", "flag", "bomb"],
+        bomb: ["three", "bomb"],
+        flag: ["one", "two", "three", "spy", "flag", "bomb"],
+    },
+    action: {
+        flag: "win",
+    }
+};
+        
         
 
 exports.games = new Games;
