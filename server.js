@@ -3,7 +3,7 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , game = require('./game')
-    , port = (process.env.PORT || 8081);
+    , port = (process.env.PORT || $NODEPORT);
 
 //Setup Express
 var server = express.createServer();
