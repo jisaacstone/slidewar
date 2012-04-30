@@ -16,7 +16,7 @@ $(document).ready(function() {
     });
 
     socket.on('gameStart', function(data){
-        game = new Game(data);
+        game = new Game(data, socket.socket.sessionid);
     });
 
     socket.on('gameUpdate', function(data){
@@ -98,8 +98,9 @@ $(document).ready(function() {
     });
 });
 
-function Game(id) {
+function Game(id, player) {
     this.id = id;
+    this.player = player;
     this.tiles = {};
     this.blockHeight = 90;
     this.blockWidth = 60;
@@ -121,7 +122,7 @@ function Game(id) {
             var tile = args.tiles[i];
             this.createTile(tile.id, {
                 bottom: (tile.y * this.blockHeight) + "px",
-                left: (tile.x * this.blockWidth) + "px"
+                left: -1 * this.blockWidth 
             });
         }
         for(var i in args.yourTiles){
@@ -165,15 +166,19 @@ function Tile(id, game) {
         ) + "px";
         $("#" + this.id).animate(animateCss, data.time, "linear");
         if(data.battle){
+            var player = this.game.player;
             setTimeout(function(){
                 for(var i in data.battle.losses){
-                    game.tiles[data.battle.losses[i]].kill();
+                    var tile = game.tiles[data.battle.losses[i].tileId];
+                    tile.kill(data.battle.losses[i]);
                 }
                 for(var i in data.battle.actions){
                     var action = data.battle.actions[i][0];
                     var actionData = data.battle.actions[i][1];
                     if(action == "win"){
-                        $(".tile").removeClass('active');
+                        var message = actionData == player ? "win!" : "lose";
+                        $('#reciever').append('<li>GAME OVER: you ' + message + '</li>');  
+                        $('div').die();
                     }
                 }
             }, data.time);
@@ -181,11 +186,22 @@ function Tile(id, game) {
     }
 
     this.moveTo = function(pos){
+        console.log(pos);
         $("#" + this.id).css(pos);
     }
 
-    this.kill = function(){
-        $("#" + this.id).remove();
+    this.kill = function(data){
+        if( ! ($("#" + this.id).hasClass('yours'))){
+            $("#" + this.id).addClass(data.tileClass);
+            console.log(data, (7 * this.game.blockWidth) + "px");
+            this.moveTo({
+                left: (7 * this.game.blockWidth) + "px", 
+                bottom: (data.tileIndex * this.game.blockHeight) + "px"
+            });
+        }
+        else {
+            $("#" + this.id).remove();
+        }   
     };
 }
 

@@ -3,7 +3,7 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , game = require('./game')
-    , port = (process.env.PORT || $NODEPORT);
+    , port = (process.env.NODEPORT || 8081);
 
 //Setup Express
 var server = express.createServer();
@@ -12,7 +12,7 @@ server.configure(function(){
     server.set('view options', { layout: false });
     server.use(connect.bodyParser());
     server.use(express.cookieParser());
-    server.use(express.session({ secret: "shhhhhhhhh!"}));
+    server.use(express.session({ secret: "nobody-4-7-8-time"}));
     server.use(connect.static(__dirname + '/static'));
     server.use(server.router);
 });
