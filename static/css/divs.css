@@ -30,6 +30,9 @@ div.active{
 div.captured{
     display: block;
 }
+div.killed{
+    left: 420px;
+}
 .one{
     background-image: url('/images/one.png');
 }

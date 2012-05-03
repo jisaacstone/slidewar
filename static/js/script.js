@@ -1,5 +1,3 @@
-/* Author: YOUR MAME HERE
-*/
 
 $(document).ready(function() {   
 
@@ -176,7 +174,7 @@ function Tile(id, game) {
                     var action = data.battle.actions[i][0];
                     var actionData = data.battle.actions[i][1];
                     if(action == "win"){
-                        var message = actionData == player ? "win!" : "lose";
+                        var message = actionData == player ? "lose" : "win!";
                         $('#reciever').append('<li>GAME OVER: you ' + message + '</li>');  
                         $('div').die();
                     }
@@ -192,10 +190,9 @@ function Tile(id, game) {
 
     this.kill = function(data){
         if( ! ($("#" + this.id).hasClass('yours'))){
-            $("#" + this.id).addClass(data.tileClass);
+            $("#" + this.id).addClass(data.tileClass).addClass("killed").removeAttr('style');
             console.log(data, (7 * this.game.blockWidth) + "px");
             this.moveTo({
-                left: (7 * this.game.blockWidth) + "px", 
                 bottom: (data.tileIndex * this.game.blockHeight) + "px"
             });
         }
