@@ -122,6 +122,7 @@ function Game(id, settings){
             tile[axis] += move.sign[data.direction];
             var action = this.isAction(tile.x, tile.y, tile.id);
             if(action){
+                console.log(action);
                 if(action.battle){
                     battle = action.battle;
                 }
@@ -199,7 +200,7 @@ function Game(id, settings){
 
         // map-based actions
         if( ! (this.map.map[y][x] in [0,1])){
-            return this.map.actions[this.map.map[y][x]];
+            return this.act(tileId, this.map.actions[this.map.map[y][x]]);
         }
         return false;
     };
@@ -238,12 +239,45 @@ function Game(id, settings){
     };
 
     this.act = function(tileId, action){
+        if( ! action){
+            return false;
+        }
         if(action == "win"){
             this.state = "over";
             this.winner = this.tiles[tileId].owner;
             return ["win", this.winner];
         }
+        if(action["type"] == "static"){
+            return action;
+        }
+        if(action["type"] == "baseAttack"){
+            for(var i in this.players){
+                if(this.map.start[i].x == this.tiles[tileId].x
+                && this.map.start[i].y == this.tiles[tileId].y){
+                    console.log("player", i, this.flagInBase(this.players[i]));
+                    if( ! (this.players[i] == this.tiles[tileId].owner)
+                    && this.flagInBase(this.players[i])){
+                        return {battle: {actions: [["win", this.players[i]]]}, stop: true}
+                    } else {
+                        return {stop: true};
+                    }
+                }
+            }
+        }
+        return false;        
     };
+
+    this.flagInBase = function(player){
+        for(var i in this.playerTiles[player]){
+            var tile = this.playerTiles[player][i];
+            if(tile.tileClass == "flag"){
+                if( ! (tile.id in this.activeTiles)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
 
 function Tile(id, owner, tileClass){
@@ -274,9 +308,11 @@ var defaultMap = {
     ],
     actions: {
         s: {
+            type: "static",
             stop: true,
         },
         b: {
+            type: "baseAttack",
             stop: true,
         },
     }
