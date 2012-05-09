@@ -6,14 +6,7 @@ function Games(){
     this.openGames = {};
     this.defaultSettings = {
         numPlayers: 2,
-        tiles: [
-            "one",      
-            "two",
-            "three", "three",
-            "flag",
-            "bomb",
-            "spy",
-        ],
+        tiles: tilesRPSF,
     };
 
     this.join = function(data){
@@ -59,6 +52,7 @@ function Game(id, settings){
     this.tiles = {};
     this.activeTiles = {};
     this.map = defaultMap;
+    this.loss = lossRPSF;
     this.queue = [];
     this.state = "open";
     this.winner = false;
@@ -208,7 +202,7 @@ function Game(id, settings){
     this.fightBattle = function(combatants){
         losses = [];
         actions = [];
-        if(loss.attack[combatants.a.tileClass].indexOf(combatants.d.tileClass) > -1){
+        if(this.loss.attack[combatants.a.tileClass].indexOf(combatants.d.tileClass) > -1){
             combatants.a.active = false;
             delete this.activeTiles[combatants.a.id];
             losses.push({
@@ -216,12 +210,12 @@ function Game(id, settings){
                 tileClass: combatants.a.tileClass,
                 tileIndex: this.playerTiles[combatants.a.owner].indexOf(combatants.a)
             });
-            if(loss.action[combatants.a.tileClass]){
-                var action = loss.action[combatants.a.tileClass];
+            if(this.loss.action[combatants.a.tileClass]){
+                var action = this.loss.action[combatants.a.tileClass];
                 actions.push(this.act(combatants.a.id, action));
             };
         }
-        if(loss.defense[combatants.d.tileClass].indexOf(combatants.a.tileClass) > -1){
+        if(this.loss.defense[combatants.d.tileClass].indexOf(combatants.a.tileClass) > -1){
             combatants.d.active = false;
             delete this.activeTiles[combatants.d.id];
             losses.push({
@@ -230,8 +224,8 @@ function Game(id, settings){
                 tileIndex: this.playerTiles[combatants.d.owner].indexOf(combatants.d)
             });
             console.log(this.playerTiles[combatants.d.owner].length)
-            if(loss.action[combatants.d.tileClass]){
-                var action = loss.action[combatants.d.tileClass];
+            if(this.loss.action[combatants.d.tileClass]){
+                var action = this.loss.action[combatants.d.tileClass];
                 actions.push(this.act(combatants.d.id, action));
             };
         }
@@ -339,7 +333,31 @@ var move = {
     }
 };
 
-var loss = {
+var tilesRPSF = [
+    "rock", "rock", "paper", "paper", "scissors", "scissors", "flag",
+]
+var lossRPSF = {
+    attack: {
+        rock: ["rock", "paper"],
+        paper: ["paper", "scissors"],
+        scissors: ["scissors", "rock"],
+        flag: ["rock", "paper", "scissors"],
+    },
+    defense: {
+        rock: ["rock", "paper"],
+        paper: ["paper", "scissors"],
+        scissors: ["scissors", "rock"],
+        flag: ["rock", "paper", "scissors"],
+    },
+    action: {
+        flag: "win",
+    }
+}
+
+var tilesStratego = [
+    "one", "two", "three", "three", "spy", "flag", "bomb",
+]
+var lossStratego = {
     attack: {
         one: ["bomb", "one"],
         two: ["bomb", "one", "two"],
