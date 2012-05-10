@@ -10,10 +10,22 @@ function Games(){
     };
 
     this.join = function(data){
+        var create = false;
+        var gameToJoin = false;
+
         if(Object.keys(this.openGames).length){
-            gameToJoin = Object.keys(this.openGames)[0];
+            if(data.gameId){
+                if(data.gameId in this.openGames){
+                    gameToJoin = this.openGames[gameId];
+                } else {
+                    return false;
+                }
+            } else {
+                gameToJoin = Object.keys(this.openGames)[0];
+            }
         } else {
             gameToJoin = this.create({});
+            create = true;
         }
         this.openGames[gameToJoin].players.push(data.playerId);
         var gameStart = this.openGames[gameToJoin].players.length                         
@@ -29,7 +41,8 @@ function Games(){
 
         return {gameId: gameToJoin, 
                 room: gameToJoin,
-                start: gameStart};
+                start: gameStart,
+                create: create};
     }
 
     this.create = function(data){
@@ -76,7 +89,6 @@ function Game(id, settings){
                 });
             }        
         }
-        console.log(this.playerTiles);
         return [tileData, this.playerTiles];
     }
 
@@ -88,7 +100,6 @@ function Game(id, settings){
         if ( ! (tile.id in this.activeTiles)){
             var playerIndex = __.values(this.players).indexOf(data.playerId);
             var startPos = this.map.start[playerIndex];
-            console.log(tile.tileClass);
             if(this.isOpen(startPos.x, startPos.y, tile.id)){
                 this.activeTiles[tile.id] = tile;
                 tile.x = startPos.x;
@@ -117,7 +128,6 @@ function Game(id, settings){
             tile[axis] += move.sign[data.direction];
             var action = this.isAction(tile.x, tile.y, tile.id);
             if(action){
-                console.log(action);
                 if(action.battle){
                     battle = action.battle;
                 }
@@ -147,18 +157,15 @@ function Game(id, settings){
 
     this.isOpen = function(x, y, tileId){
         if(x < 0 || y < 0 || x >= this.map.width || y >= this.map.height){
-            console.log("out of bounds");
             return false;
         }
         if(this.map.map[y][x] === 1){
-            console.log("map not open");
             return false;
         }
         for(var i in this.activeTiles){
             var tile = this.activeTiles[i];
             if(tile.x == x && tile.y == y){
                 if(tile.id != tileId){
-                    console.log("tile found");
                     return false;
                 }
             }
@@ -183,10 +190,8 @@ function Game(id, settings){
             }
             return false;
         });
-        console.log(collision);
 
         if(collision.length){
-            console.log("BATTLE");
             return {
                 battle: game.fightBattle({
                     a: game.tiles[tileId],
@@ -227,7 +232,6 @@ function Game(id, settings){
                 tileClass: combatants.d.tileClass,
                 tileIndex: this.playerTiles[combatants.d.owner].indexOf(combatants.d)
             });
-            console.log(this.playerTiles[combatants.d.owner].length)
             if(this.loss.action[combatants.d.tileClass]){
                 var action = this.loss.action[combatants.d.tileClass];
                 actions.push(this.act(combatants.d.id, action));
@@ -252,7 +256,6 @@ function Game(id, settings){
             for(var i in this.players){
                 if(this.map.start[i].x == this.tiles[tileId].x
                 && this.map.start[i].y == this.tiles[tileId].y){
-                    console.log("player", i, this.flagInBase(this.players[i]));
                     if( ! (this.players[i] == this.tiles[tileId].owner)
                     && this.flagInBase(this.players[i])){
                         return {battle: {actions: [["win", this.players[i]]]}, stop: true}

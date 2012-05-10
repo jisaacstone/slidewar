@@ -41,7 +41,9 @@ server.listen( port);
 //Setup Socket.IO
 var io = io.listen(server);
 io.sockets.on('connection', function(socket){
-  console.log('Client Connected');
+  for(var gameId in game.games.openGames){
+    socket.emit('newGame', gameId);
+  }
 
   socket.on('message', function(data){
     if( ! (data.playerId in game.games.players)){
@@ -56,7 +58,9 @@ io.sockets.on('connection', function(socket){
   socket.on('join', function(data){
     gameData = game.games.join(data);
     socket.join(gameData.gameId);
-    io.sockets.in(gameData.gameId).emit('serverMessage', gameData.gameId);
+    if(gameData.create){
+        io.sockets.emit('newGame', gameData.gameId);
+    }
     if(gameData.start){
         io.sockets.in(gameData.gameId).emit('gameStart', gameData.gameId);
         var currentGame = game.games.runningGames[gameData.gameId];
@@ -111,7 +115,20 @@ io.sockets.on('connection', function(socket){
   });
 
   socket.on('disconnect', function(){
-    console.log('Client Disconnected.');
+    console.log('Client Disconnected.', this.id, game.games.players);
+    // Remove disconnected client from games
+    var gameId = game.games.players[this.id];
+    var allGames = [game.games.runningGames, game.games.openGames];
+    for(var i in allGames){
+        var obj = allGames[i];
+        if(obj[gameId]){
+            var index = obj[gameId].players.indexOf(this.id);
+            if(index > -1){
+                obj[gameId].players.splice(index, 1);
+            }
+        }
+    }
+    delete game.games.players[this.id];
   });
 });
 

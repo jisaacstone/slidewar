@@ -5,16 +5,31 @@ $(document).ready(function() {
     var game = false;
 
     $('#joinGame').bind('click', function() {
-         socket.emit('join', {playerId: socket.socket.sessionid});
-         $(this).hide();
+        socket.emit('join', {playerId: socket.socket.sessionid});
+        $(this).hide();
+    });
+    $('#openGames button').live("click", function(e){
+        socket.emit('join', {
+            gameId: $(e).data('game'),
+            playerId: socket.socket.sessionid,
+        });
     });
 
     socket.on('serverMessage', function(data){
         $('#reciever').append('<li>' + data + '</li>');  
     });
 
+    socket.on('newGame', function(data){
+        if(game && game.running){
+            return;
+        }
+        $('#openGames').append('<li><span>' + data + '</span>' +
+            '<button data-game="' + data +'">join</button></li>');
+    });
+
     socket.on('gameStart', function(data){
         game = new Game(data, socket.socket.sessionid);
+        $('#openGames').hide();
     });
 
     socket.on('gameUpdate', function(data){
