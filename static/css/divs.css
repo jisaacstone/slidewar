@@ -60,3 +60,28 @@ div.killed{
 .scissors{
     background-image: url('/images/scissors.png');
 }
+.index_0{
+    bottom: 0;
+}
+.index_1{
+    bottom: 90px;
+}
+.index_2{
+    bottom: 180px;
+}
+.index_3{
+    bottom: 270px;
+}
+.index_4{
+    bottom: 360px;
+}
+.index_5{
+    bottom: 450px;
+}
+.index_6{
+    bottom: 540px;
+}
+.index_7{
+    bottom: 630px;
+}
+

@@ -85,7 +85,7 @@ function Game(id, settings){
         if(tile.owner != data.playerId){
             throw new Error("attempting to activate unowned tile!");
         }
-        if ( ! (tile.id in __.keys(this.activeTiles))){
+        if ( ! (tile.id in this.activeTiles)){
             var playerIndex = __.values(this.players).indexOf(data.playerId);
             var startPos = this.map.start[playerIndex];
             console.log(tile.tileClass);
@@ -111,7 +111,8 @@ function Game(id, settings){
             throw new Error("attempting to move unowned tile!");
         }
         var axis = move.axis[data.direction];
-        console.log(tile[axis]);
+        var tileStart = tile[axis];
+
         do {
             tile[axis] += move.sign[data.direction];
             var action = this.isAction(tile.x, tile.y, tile.id);
@@ -125,20 +126,23 @@ function Game(id, settings){
                     break;
                 }
             }
-        }
-        while(this.isOpen(tile.x, tile.y, tile.id))
+        } while(this.isOpen(tile.x, tile.y, tile.id))
         tile[axis] -= move.sign[data.direction]; 
-        console.log(tile[axis]);
-        return {
-            tile: data.tileId,
-            method: "move",
-            args: {
-                attribute: move.attribute[data.direction],
-                change: tile[axis],
-                time: 1000,
-                battle: battle,
-            }
-        };
+        
+        var distance = Math.abs(tile[axis] - tileStart)
+
+        if(distance > 0){
+            return {
+                tile: data.tileId,
+                method: "move",
+                args: {
+                    attribute: move.attribute[data.direction],
+                    change: tile[axis],
+                    time: 200 * distance,
+                    battle: battle,
+                }
+            };
+        }
     }                                                                           
 
     this.isOpen = function(x, y, tileId){
@@ -229,7 +233,7 @@ function Game(id, settings){
                 actions.push(this.act(combatants.d.id, action));
             };
         }
-        return {losses: losses, actions: actions};
+        return {losses: losses, actions: actions, reveal: combatants};
     };
 
     this.act = function(tileId, action){

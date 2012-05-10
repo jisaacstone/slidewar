@@ -29,15 +29,17 @@ $(document).ready(function() {
     });
 
     $(".yours").live("click", function(e){
-        var o = JSON.stringify({                              
-            playerId: socket.socket.sessionid,                                  
-            method: "activate",                                                 
-            gameId: game.id,                                                    
-            args: {                                                             
-                tileId: $(this).attr('id'),                                     
-            },                                                                  
-        });
-        socket.emit('gameUpdate', o);
+        if(game && game.running){
+            var o = JSON.stringify({                              
+                playerId: socket.socket.sessionid,                                  
+                method: "activate",                                                 
+                gameId: game.id,                                                    
+                args: {                                                             
+                    tileId: $(this).attr('id'),                                     
+                },                                                                  
+            });
+            socket.emit('gameUpdate', o);
+        }
     });
 
     clicked = false;
@@ -56,7 +58,7 @@ $(document).ready(function() {
     });
 
     $('.gameContainer').mouseup(function(){
-        if(clicked && game){
+        if(clicked && game && game.running){
             direction = "";
             diff_x = start_x - mouse_x;
             diff_y = start_y - mouse_y;
@@ -102,6 +104,7 @@ function Game(id, player) {
     this.tiles = {};
     this.blockHeight = 90;
     this.blockWidth = 60;
+    this.running = true;
     this.settings = {
         bottom: this.blockHeight,
         left: this.blockWidth
@@ -162,13 +165,21 @@ function Tile(id, game) {
         animateCss[data.attribute] = (
             data.change * this.game.settings[data.attribute]
         ) + "px";
-        $("#" + this.id).animate(animateCss, data.time, "linear");
+        $("#" + this.id).animate(animateCss, data.time, "linear", function(){
+            if($(this).hasClass('killed')){
+                $(this).removeAttr('style');
+            }
+        });
         if(data.battle){
             var player = this.game.player;
             setTimeout(function(){
                 for(var i in data.battle.losses){
                     var tile = game.tiles[data.battle.losses[i].tileId];
                     tile.kill(data.battle.losses[i]);
+                }
+                for(var i in data.battle.reveal){
+                    var tile = game.tiles[data.battle.reveal[i].id];
+                    tile.reveal(data.battle.reveal[i].tileClass);
                 }
                 for(var i in data.battle.actions){
                     var action = data.battle.actions[i][0];
@@ -177,6 +188,7 @@ function Tile(id, game) {
                         var message = actionData == player ? "lose" : "win!";
                         $('#reciever').append('<li>GAME OVER: you ' + message + '</li>');  
                         $('div').die();
+                        game.running = false;
                     }
                 }
             }, data.time);
@@ -190,16 +202,17 @@ function Tile(id, game) {
 
     this.kill = function(data){
         if( ! ($("#" + this.id).hasClass('yours'))){
-            $("#" + this.id).addClass(data.tileClass).addClass("killed").removeAttr('style');
-            console.log(data, (7 * this.game.blockWidth) + "px");
-            this.moveTo({
-                bottom: (data.tileIndex * this.game.blockHeight) + "px"
-            });
+            $("#" + this.id).removeAttr('style').addClass("killed")
+                .addClass("index_"+data.tileIndex);
         }
         else {
             $("#" + this.id).remove();
         }   
     };
+
+    this.reveal = function(tileClass){
+        $("#" + this.id).addClass(tileClass);
+    }
 }
 
 
