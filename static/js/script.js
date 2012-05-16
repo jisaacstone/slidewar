@@ -4,8 +4,11 @@ $(document).ready(function() {
     var socket = io.connect();
     var game = false;
 
-    $('#joinGame').bind('click', function() {
-        socket.emit('join', {playerId: socket.socket.sessionid});
+    $('#createGame').bind('click', function() {
+        socket.emit('join', {
+            playerId: socket.socket.sessionid,
+            create: true
+        });
         $(this).hide();
     });
     $('#openGames button').live("click", function(e){
@@ -13,6 +16,7 @@ $(document).ready(function() {
             gameId: $(e).data('game'),
             playerId: socket.socket.sessionid,
         });
+        $('#createGame').hide();
     });
 
     socket.on('serverMessage', function(data){

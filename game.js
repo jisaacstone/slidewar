@@ -13,7 +13,10 @@ function Games(){
         var create = false;
         var gameToJoin = false;
 
-        if(Object.keys(this.openGames).length){
+        if(data.create || ! (Object.keys(this.openGames).length)){
+            gameToJoin = this.create({});
+            create = true;
+        } else {
             if(data.gameId){
                 if(data.gameId in this.openGames){
                     gameToJoin = this.openGames[gameId];
@@ -23,9 +26,6 @@ function Games(){
             } else {
                 gameToJoin = Object.keys(this.openGames)[0];
             }
-        } else {
-            gameToJoin = this.create({});
-            create = true;
         }
         this.openGames[gameToJoin].players.push(data.playerId);
         var gameStart = this.openGames[gameToJoin].players.length                         
