@@ -40,6 +40,7 @@ server.listen( port);
 
 //Setup Socket.IO
 var io = io.listen(server);
+io.set('log level', (process.env.NODELOGLEVEL || 3));
 io.sockets.on('connection', function(socket){
   for(var gameId in game.games.openGames){
     socket.emit('newGame', gameId);
