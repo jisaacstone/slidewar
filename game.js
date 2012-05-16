@@ -123,14 +123,13 @@ function Game(id, settings){
         }
         var axis = move.axis[data.direction];
         var tileStart = tile[axis];
+        var actions = {};
 
         do {
             tile[axis] += move.sign[data.direction];
             var action = this.isAction(tile.x, tile.y, tile.id);
             if(action){
-                if(action.battle){
-                    battle = action.battle;
-                }
+                __.extend(actions, action);
                 if(action.stop){
                     tile[axis] += move.sign[data.direction];
                     break;
@@ -149,7 +148,7 @@ function Game(id, settings){
                     attribute: move.attribute[data.direction],
                     change: tile[axis],
                     time: 200 * distance,
-                    battle: battle,
+                    actions: __.isEmpty(actions) ? false : actions,
                 }
             };
         }
@@ -180,6 +179,7 @@ function Game(id, settings){
             return false;                                                       
         }                                                                       
 
+        var allActions = {};
         var game = this; // because of __.each !
         // collision with an enemy tile
         var collision = __.filter(__.values(game.tiles), function(testTile){
@@ -192,20 +192,25 @@ function Game(id, settings){
         });
 
         if(collision.length){
-            return {
-                battle: game.fightBattle({
-                    a: game.tiles[tileId],
-                    d: collision[0]
-                }),
-                stop: true,
-            };
+            var battle = game.fightBattle({                                      
+                a: game.tiles[tileId],                                      
+                d: collision[0]                                             
+            });
+            __.extend(
+                allActions, 
+                battle,
+                {stop: true}
+            );
         }
 
         // map-based actions
         if( ! (this.map.map[y][x] in [0,1])){
-            return this.act(tileId, this.map.actions[this.map.map[y][x]]);
+            __.extend(
+                allActions, 
+                this.act(tileId, this.map.actions[this.map.map[y][x]])
+            );
         }
-        return false;
+        return __.isEmpty(allActions) ? false : allActions;
     };
 
     this.fightBattle = function(combatants){
@@ -258,7 +263,7 @@ function Game(id, settings){
                 && this.map.start[i].y == this.tiles[tileId].y){
                     if( ! (this.players[i] == this.tiles[tileId].owner)
                     && this.flagInBase(this.players[i])){
-                        return {battle: {actions: [["win", this.players[i]]]}, stop: true}
+                        return {actions: [["win", this.players[i]]], stop: true}
                     } else {
                         return {stop: true};
                     }

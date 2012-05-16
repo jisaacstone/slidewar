@@ -180,25 +180,23 @@ function Tile(id, game) {
         animateCss[data.attribute] = (
             data.change * this.game.settings[data.attribute]
         ) + "px";
-        $("#" + this.id).animate(animateCss, data.time, "linear", function(){
-            if($(this).hasClass('killed')){
-                $(this).removeAttr('style');
-            }
-        });
-        if(data.battle){
-            var player = this.game.player;
-            setTimeout(function(){
-                for(var i in data.battle.losses){
-                    var tile = game.tiles[data.battle.losses[i].tileId];
-                    tile.kill(data.battle.losses[i]);
+
+        if(data.actions){
+            var player = game.player;
+            var a = data.actions;
+            var afterAnimate = function(){
+                for(var i in a.losses){
+                    var tile = game.tiles[a.losses[i].tileId];
+                    console.log(tile);
+                    tile.kill(a.losses[i]);
                 }
-                for(var i in data.battle.reveal){
-                    var tile = game.tiles[data.battle.reveal[i].id];
-                    tile.reveal(data.battle.reveal[i].tileClass);
+                for(var i in a.reveal){
+                    var tile = game.tiles[a.reveal[i].id];
+                    tile.reveal(a.reveal[i].tileClass);
                 }
-                for(var i in data.battle.actions){
-                    var action = data.battle.actions[i][0];
-                    var actionData = data.battle.actions[i][1];
+                for(var i in a.actions){
+                    var action = a.actions[i][0];
+                    var actionData = a.actions[i][1];
                     if(action == "win"){
                         var message = actionData == player ? "lose" : "win!";
                         $('#reciever').append('<li>GAME OVER: you ' + message + '</li>');  
@@ -206,8 +204,12 @@ function Tile(id, game) {
                         game.running = false;
                     }
                 }
-            }, data.time);
+            };
+        } else {
+            afterAnimate = function(){};
         }
+
+        $("#" + this.id).animate(animateCss, data.time, "linear", afterAnimate);
     }
 
     this.moveTo = function(pos){
@@ -216,6 +218,7 @@ function Tile(id, game) {
     }
 
     this.kill = function(data){
+        console.log('kill', data);
         if( ! ($("#" + this.id).hasClass('yours'))){
             $("#" + this.id).removeAttr('style').addClass("killed")
                 .addClass("index_"+data.tileIndex);
