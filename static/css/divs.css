@@ -1,3 +1,17 @@
+body{
+    margin: 12%;
+    color: rgba(33, 55, 33, 1);
+}
+
+#createGame{
+    cursor: pointer;
+    padding: 0.5em;
+    box-shadow: 1em 2em 1em rgba(222, 226, 204, 0.9) inset;
+    color: rgba(32, 68, 45, 0.9);
+    font-weight: bold;
+    border-radius: 0.1em;
+}
+
 .clicky{
     width: 200px;
     height: 200px;
