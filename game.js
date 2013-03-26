@@ -28,7 +28,7 @@ function Games(){
             }
         }
         this.openGames[gameToJoin].players.push(data.playerId);
-        var gameStart = this.openGames[gameToJoin].players.length                         
+        var gameStart = this.openGames[gameToJoin].players.length
                      >= this.openGames[gameToJoin].settings.numPlayers;
 
         if(gameStart){
@@ -298,13 +298,13 @@ function Tile(id, owner, tileClass){
 
 var defaultMap = {                                                                
     map: [                                                                      
-        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ],                                                        
-        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],                                                        
-        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],                                                        
-        [ 0 , 0 ,'s', 1 ,'s', 0 , 0 ],                                                        
-        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],                                                        
-        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],                                                        
-        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ]                                                         
+        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ],
+        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],
+        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],
+        [ 0 , 0 ,'s', 1 ,'s', 0 , 0 ],
+        [ 0 , 0 , 0 ,'s', 0 , 0 , 0 ],
+        [ 1 , 0 , 0 ,'b', 0 , 0 , 1 ],
+        [ 1 , 1 , 0 , 0 , 0 , 1 , 1 ]
     ],                                                                          
     width: 7,                                                                   
     height: 7,                                                                  
@@ -390,7 +390,5 @@ var lossStratego = {
         flag: "win",
     }
 };
-        
-        
 
 exports.games = new Games;
